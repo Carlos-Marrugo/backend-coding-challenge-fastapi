@@ -5,59 +5,45 @@
 
 ## Overview
 
-This project is an asynchronous job processing API built with **FastAPI**. It allows clients to submit long-running tasks (jobs), processes them in the background, and provides endpoints to track the status of each job.
-
-The goal of this project is to demonstrate backend engineering fundamentals such as API design, request validation, background processing, persistence, error handling, and clean architecture.
-
----
-
-## Why This Project Exists
-
-In real-world systems, many operations cannot be processed synchronously within a single HTTP request. Examples include:
-
-* Processing large files
-* Data crawling and ingestion
-* Document analysis
-* Long-running computations
-* AI or ML-related tasks
-
-Blocking an HTTP request for these operations leads to timeouts, poor user experience, and scalability issues. This project demonstrates how to handle such scenarios using asynchronous background processing while keeping the API responsive.
+This project is an asynchronous job processing API built with **FastAPI**. It provides a simple interface for submitting jobs, processing them in the background, and retrieving their execution status.
 
 ---
 
 ## What This API Does
 
-The API provides a simple but realistic workflow:
+The API exposes endpoints that allow clients to:
 
-1. **Create a Job** – Clients submit a job with metadata and payload.
-2. **Process the Job Asynchronously** – Jobs are processed in the background without blocking requests.
-3. **Track Job Status** – Clients can query the current status of a job at any time.
+* Submit a job with a name and arbitrary payload
+* Process jobs asynchronously in the background
+* Retrieve the current status and details of a job
+
+Each job is persisted in a database and transitions through its lifecycle independently of the request that created it.
 
 ---
 
-## Architecture Overview
+## Architecture
 
-The project follows a clean and modular backend architecture:
+The application follows a modular structure:
 
-* **Routers**: Handle HTTP requests and responses
-* **Schemas (Pydantic)**: Validate and serialize request/response data
-* **Models (SQLAlchemy)**: Define database schema
-* **Services**: Contain business logic
-* **Workers**: Handle background job processing
-* **Database Layer**: Manages persistence and sessions
+* **Routers** handle HTTP request/response logic
+* **Schemas** define request and response models
+* **Models** define database entities
+* **Services** contain business logic
+* **Workers** process jobs asynchronously
+* **Database layer** manages persistence and sessions
 
-This separation of concerns improves maintainability, testability, and scalability.
+This structure keeps concerns separated and the codebase easy to maintain.
 
 ---
 
 ## Technology Stack
 
-* **Python**
-* **FastAPI** – Web framework
-* **SQLAlchemy** – ORM
-* **SQLite** – Database (for simplicity and portability)
-* **Pydantic** – Data validation
-* **Uvicorn** – ASGI server
+* Python
+* FastAPI
+* SQLAlchemy
+* SQLite
+* Pydantic
+* Uvicorn
 
 ---
 
@@ -79,13 +65,13 @@ Response:
 
 ---
 
-### Create a Job
+### Create Job
 
 ```
 POST /jobs
 ```
 
-Request Body:
+Request body:
 
 ```json
 {
@@ -114,7 +100,7 @@ Response (201 Created):
 
 ---
 
-### Get Job Status
+### Get Job
 
 ```
 GET /jobs/{job_id}
@@ -149,81 +135,51 @@ Response (404 Not Found):
 
 ## Background Processing
 
-Jobs are processed asynchronously using FastAPI’s `BackgroundTasks`. This ensures:
-
-* HTTP requests return immediately
-* Long-running work happens outside the request lifecycle
-* The system remains responsive under load
-
-While `BackgroundTasks` is used here for simplicity, the design can be easily extended to real-world systems such as Celery, AWS SQS, or Kafka.
+Jobs are processed asynchronously using FastAPI background tasks. This allows job execution to occur outside the request lifecycle while keeping the API responsive.
 
 ---
 
-## Database Design
+## Database
 
-The `jobs` table stores:
+The application stores job data in a `jobs` table with the following fields:
 
-* `id` – Primary key
-* `name` – Job name
-* `payload` – Arbitrary JSON payload
-* `status` – Job status (`pending`, `completed`)
-* `created_at` – Timestamp
+* `id`
+* `name`
+* `payload`
+* `status`
+* `created_at`
 
-SQLite is used for simplicity, but the schema is compatible with production databases like PostgreSQL or MySQL.
+SQLite is used for local development.
 
 ---
 
-## Running the Project Locally
+## Running the Application
 
-### 1. Create and activate a virtual environment
-
-```bash
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-```
-
-### 2. Install dependencies
+### Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Run the application
+### Start the server
 
 ```bash
 uvicorn main:app --reload
 ```
 
-### 4. Access the API
+### Access
 
-* Swagger UI: [http://localhost:8000/docs](http://localhost:8000/docs)
-* Health check: [http://localhost:8000/health](http://localhost:8000/health)
-
----
-
-## Design Decisions
-
-* **Asynchronous job processing** to avoid blocking requests
-* **Clear separation of layers** for maintainability
-* **Explicit schema validation** using Pydantic
-* **Proper HTTP status codes** for API correctness
-* **Simple but realistic persistence layer**
+* API documentation: [http://localhost:8000/docs](http://localhost:8000/docs)
+* Health endpoint: [http://localhost:8000/health](http://localhost:8000/health)
 
 ---
 
-## Possible Improvements
+## Notes
 
-If this were a production system, the following enhancements would be considered:
+* The current implementation uses FastAPI `BackgroundTasks` for simplicity
+* The design can be extended to external workers or message queues
+* The project focuses on clarity, correctness, and maintainable structure
 
-* Retry mechanism for failed jobs
-* Additional job states (`failed`, `retrying`)
-* Pagination and filtering for job listings
-* Authentication and authorization
-* Structured logging and metrics
-* Dockerization
-* Automated tests
-
----
 
 ## Summary
 
