@@ -8,17 +8,12 @@ from routers import router as jobs_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """
-    Lifespan context manager for FastAPI app.
-    Handles startup and shutdown events.
-    """
-    # Startup logic
+
     print("Starting up...")
     init_db()
 
     yield
 
-    # Shutdown logic (optional)
     print("Shutting down...")
 
 
